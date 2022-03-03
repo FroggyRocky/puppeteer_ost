@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Multilogin</title>
+    <link rel="stylesheet" href="./css/materialize.min.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <script defer type="text/javascript" src="./scripts/main.js"></script>
+</head>
+<body>
+    <div id="header" class="row valign-wrapper">
+        <div class="col">
+            <button id="bulk" class="waves-effect waves-light btn">ОТКРЫТЬ: <span id="count">0</span></button>
+        </div>
+        <div class="col white">
+            <!--<label><input type="checkbox" onclick="groupCheckbox(event)" class="filled-in group-cookie" checked>
+                <span>Cookie</span>
+            </label>-->
+            <label><input type="checkbox" onclick="groupCheckbox(event)" class="filled-in group-likes" checked>
+                <span>Likes</span>
+            </label>
+            <label><input type="checkbox" onclick="groupCheckbox(event)" class="filled-in group-token" checked>
+                <span>Token</span>
+            </label>
+            <label><input type="checkbox" onclick="groupCheckbox(event)" class="filled-in group-video" checked>
+                <span>Video</span>
+            </label>
+            <label><input type="checkbox" onclick="groupCheckbox(event)" class="filled-in group-group">
+                <span>Group</span>
+            </label>
+            <label><input type="checkbox" class="filled-in group-create-bm">
+                <span>CreateBM</span>
+            </label>
+        </div>
+        <div class="col">
+            <select class="countries browser-default">
+            </select>
+        </div>
+        <div class="col">
+            <input type="text" class="browser-default account-id">
+        </div>
+        <div class="col">
+        </div>
+    </div>
+    <table class="centered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Options</th>
+            <th>Group</th>
+            <th>BM</th>
+            <th>Login</th>
+            <th>Password</th>
+            <th>Birth</th>
+            <th>Status</th>
+            <th>Multilogin</th>
+        </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+</body>
+</html>

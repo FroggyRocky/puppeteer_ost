@@ -1,0 +1,17 @@
+button.delete-phone {
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    height: 15px;
+    width: 15px;
+    cursor: pointer;
+    display: table-cell;
+}
+.host-row label {
+    display: grid;
+    grid-auto-flow: column;
+    margin-top: 20px;
+    grid-column-gap: 20px;
+    align-items: center;
+}
