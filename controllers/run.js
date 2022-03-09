@@ -257,54 +257,54 @@ async function accessToken(proxy_login, proxy_password, browser) {
         return {status: 'OK', token: token}
 }
 
-async function likes(page, options) {
+async function likes(page, options, selector) {
     if (options.likes === true) {
         await page.evaluate(_ => {
             window.scroll(0, 2823);
         });
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(5000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
         await page.evaluate(_ => {
             window.scroll(0, 3230);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(3000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
         await page.evaluate(_ => {
             window.scroll(0, 1523);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(3000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
         await page.evaluate(_ => {
             window.scroll(0, 2533);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(3000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
         await page.evaluate(_ => {
             window.scroll(0, 1868);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(3000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
         await page.evaluate(_ => {
             window.scroll(0, 1388);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
+        if (await page.$(selector) !== null) {
             await page.waitForTimeout(3000);
-            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
+            await page.click(selector);
         }
     }
 }
@@ -313,7 +313,6 @@ function waitForBasicGoToMain(page,browser, options, proxy_login, proxy_password
      setTimeout(async () => {
         try {
             if(!page.isClosed()) {
-                console.log('page is closed')
                 await page.close()
             }
         } catch(err) {
@@ -337,9 +336,21 @@ async function onMainPage(browser, options, proxy_login, proxy_password, login, 
     if(await page.$('#nux-nav-button')) {
         await page.click('#nux-nav-button')
     }
-    if(page.$('[data-sigil="messenger_icon"]')) {
-            await likes(page, options).then();
-    // if (await page.'[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null || await page.'[data-sigil="ufi-inline-actions"] > div:nth-child(1)'k"]') !== null) {
+    if(page.$('[data-sigil="messenger_icon"]')) { console.log(likes);
+            await likes(page, options, '[data-sigil="ufi-inline-actions"] > div:nth-child(1)')
+            await setTimeout(async () => {
+                    if(!page.isClosed()) {
+                    await page.goto('https://www.facebook.com/', {waitUntil: 'load', timeout: 60000});
+                    }
+                }, 10000) ///change to 30 min.
+
+                await page.waitForTimeout(10000);
+                if(page.$('div[aria-label="Facebook"')) {
+                    await likes(page, options, 'div[aria-label="Like"]')
+                }
+                
+    }    
+    // if (await page.selector) !== null || await page.selectork"]') !== null) {
     //     await closePopup(page).then();
     //     await videoQuality(page, options).then();
     //     await likes(page, options).then();
@@ -351,7 +362,10 @@ async function onMainPage(browser, options, proxy_login, proxy_password, login, 
     //         return bulk ? {[login]: result} : res.send(result);
     //     }
     // }
-}}
+}
+
+
+async function 
 
 async function toEmail(proxy_login, proxy_password, email, email_password, browser) {
     const pageGmail = await browser.newPage();
@@ -557,7 +571,7 @@ async function runSingle(uuid, login, password, email, email_password, code2fa, 
             if (await page.$('#login_form > ul') !== null) {
                 await page.type('#m_login_email', login, {delay: 99});
                 await page.type('#password_input_with_placeholder > input', password, {delay: 101});
-                await Promise.all([page.click('#login_form > ul > li:nth-child(3) > input'),page.waitForNavigation()])
+                await Promise.all([page.click('#login_form > ul > li:nth-child(3) \\\\\\\\\\\\> input'),page.waitForNavigation()])
                 if (await page.$('#approvals_code') === null) { 
                     console.log('Old password');
                     return bulk ? {[login]: {status: 'Old password'}} : res.send({status: 'Old password'})
