@@ -1,0 +1,2 @@
+#header > form > table > tbody > tr > td:nth-child(1) > a > img
+alt = Facebook logo

@@ -1,4 +1,4 @@
-const localServer = 'http://localhost:3005/multi';
+const localServer = 'http://localhost:3000/multi';
 const mainServer = 'http://350044-cq02541.tmweb.ru/api';
 const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTEsImFkbWluIjoxLCJpYXQiOjE2MDQ1NzcwNzB9.wlol2MkGxVmqh4HAA4JepDTDsf3kOA-IDL76Zrwe0_k';
 const tbody = document.getElementById('tbody');
@@ -18,18 +18,21 @@ idInput.onkeyup = function (event) {
 loadData().then();
 
 async function loadData(country, id) {
-    try {
+    try { 
         let info = '';
         const response = await fetch(`${mainServer}/multi-accounts`, {
             method: 'POST',
             headers: {
                 Authorization: 'Bearer ' + token,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                
             },
             body: JSON.stringify({country: country, id: id})
         });
+        console.log(response)
         let result = await response.json();
-        // console.log(result);
+        
+        console.log(result);
         tbody.innerHTML = '';
         let options = '';
         result.countries.forEach((el,i) => options += `${i === 0 && '<option value=""></option>'}<option value="${el.id}">${el.name}</option>`);

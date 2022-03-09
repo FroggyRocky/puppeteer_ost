@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer-core');
 const axios = require('axios');
 const fs = require('fs');
+const { Console } = require('console');
 
 const mlaPort = 35000;
 
@@ -145,6 +146,7 @@ async function videoQuality(page, options) {
         await page.goto('https://www.facebook.com/');
     }
 }
+
 async function createBM (proxy_login, proxy_password, options, browser, email, email_password) {
     if (options.createBM) {
         const pageCreateBM = await browser.newPage();
@@ -260,68 +262,97 @@ async function likes(page, options) {
         await page.evaluate(_ => {
             window.scroll(0, 2823);
         });
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(5000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
         await page.evaluate(_ => {
             window.scroll(0, 3230);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(3000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
         await page.evaluate(_ => {
             window.scroll(0, 1523);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(3000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
         await page.evaluate(_ => {
             window.scroll(0, 2533);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(3000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
         await page.evaluate(_ => {
             window.scroll(0, 1868);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(3000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
         await page.evaluate(_ => {
             window.scroll(0, 1388);
         });
         await page.waitForTimeout(5000);
-        if (await page.$('div[aria-label="Like"]') !== null) {
+        if (await page.$('[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null) {
             await page.waitForTimeout(3000);
-            await page.click('div[aria-label="Like"]');
+            await page.click('[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
         }
     }
 }
 
-async function onMainPage(page, browser, options, proxy_login, proxy_password, login, password, email, email_password, res) {
-    await page.waitForTimeout(10000);
-    if (await page.$('a[aria-label="Home"]') !== null || await page.$('a[aria-label="Facebook"]') !== null) {
-        await closePopup(page).then();
-        await videoQuality(page, options).then();
-        await likes(page, options).then();
-        await createGroup(page, options).then();
-        await createBM (proxy_login, proxy_password, options, browser, email, email_password).then();
-        await addBM(password, proxy_login, proxy_password, browser, options).then();
-        if (options.token) {
-            const result = await accessToken(proxy_login, proxy_password, browser);
-            return bulk ? {[login]: result} : res.send(result);
+function waitForBasicGoToMain(page,browser, options, proxy_login, proxy_password, login, password, email, email_password, res) { console.log('wait and go');
+     setTimeout(async () => {
+        try {
+            if(!page.isClosed()) {
+                console.log('page is closed')
+                await page.close()
+            }
+        } catch(err) {
+            console.error('unexpected error occured when closing page.', err)
         }
+       
+    }, 10000) ///change to 30 min.
+
+    onMainPage(browser, options, proxy_login, proxy_password, login, password, email, email_password, res).then();
+} 
+
+async function onMainPage(browser, options, proxy_login, proxy_password, login, password, email, email_password, res) {
+    console.log('onmainpage')
+    const context = browser.defaultBrowserContext();
+    await context.overridePermissions("https://m.facebook.com/", ["notifications"]);
+    const page = await browser.newPage();
+    await page.authenticate({username: proxy_login, password: proxy_password});
+    await setCookie(options.cookie, page).then();
+    await page.goto('https://m.facebook.com/', {waitUntil: 'load', timeout: 60000});
+    await page.waitForTimeout(10000);
+    if(await page.$('#nux-nav-button')) {
+        await page.click('#nux-nav-button')
     }
-}
+    if(page.$('[data-sigil="messenger_icon"]')) {
+            await likes(page, options).then();
+    // if (await page.'[data-sigil="ufi-inline-actions"] > div:nth-child(1)') !== null || await page.'[data-sigil="ufi-inline-actions"] > div:nth-child(1)'k"]') !== null) {
+    //     await closePopup(page).then();
+    //     await videoQuality(page, options).then();
+    //     await likes(page, options).then();
+    //     await createGroup(page, options).then();
+    //     await createBM (proxy_login, proxy_password, options, browser, email, email_password).then();
+    //     await addBM(password, proxy_login, proxy_password, browser, options).then();
+    //     if (options.token) {
+    //         const result = await accessToken(proxy_login, proxy_password, browser);
+    //         return bulk ? {[login]: result} : res.send(result);
+    //     }
+    // }
+}}
+
 async function toEmail(proxy_login, proxy_password, email, email_password, browser) {
     const pageGmail = await browser.newPage();
     await pageGmail.authenticate({username: proxy_login, password: proxy_password});
@@ -503,7 +534,7 @@ async function runSingle(uuid, login, password, email, email_password, code2fa, 
     try {
         await delay(5000);
         let response;
-        try {
+        try { 
             response = await axios.get(`http://localhost.multiloginapp.com:${mlaPort}/api/v1/profile/start?automation=true&puppeteer=true&profileId=${uuid}`);
         } catch (e) {
             return bulk ? {[login]: {status: 'Multilogin error'}} : res.send({status: 'Multilogin error'})
@@ -518,50 +549,48 @@ async function runSingle(uuid, login, password, email, email_password, code2fa, 
             });
             await delay(2000);
             const context = browser.defaultBrowserContext();
-            await context.overridePermissions('https://www.facebook.com/login', ['notifications']);
+            await context.overridePermissions("https://mbasic.facebook.com/", ["notifications"]);
             const page = await browser.newPage();
             await page.authenticate({username: proxy_login, password: proxy_password});
             await setCookie(options.cookie, page).then();
-            await page.goto('https://facebook.com/login', {waitUntil: 'load', timeout: 60000});
-            if (await page.$('[data-cookiebanner="accept_button"]') !== null) {
-                await page.click('[data-cookiebanner="accept_button"]');
-            }
-            if (await page.$('#email') !== null) {
-                await page.type('#email', login, {delay: 99});
-                await page.type('#pass', password, {delay: 101});
-                await page.click('#loginbutton');
-                await page.waitForNavigation();
-                if (await page.$('#pass') !== null || await page.$('.uiIconText') !== null) {
+            await page.goto('https://mbasic.facebook.com', {waitUntil: 'load', timeout: 60000});
+            if (await page.$('#login_form > ul') !== null) {
+                await page.type('#m_login_email', login, {delay: 99});
+                await page.type('#password_input_with_placeholder > input', password, {delay: 101});
+                await Promise.all([page.click('#login_form > ul > li:nth-child(3) > input'),page.waitForNavigation()])
+                if (await page.$('#approvals_code') === null) { 
                     console.log('Old password');
                     return bulk ? {[login]: {status: 'Old password'}} : res.send({status: 'Old password'})
                 }
 
             }
             // Проверяем на двухфакторку и вводим 2fa
-            if (await page.$('#approvals_code') !== null) {
+            if (await page.$('#approvals_code') !== null) { 
+                console.log('2fa')
                 const faCode = await get2Fa(code2fa);
                 await page.type('#approvals_code', faCode, {delay: 86});
-                await page.click('#checkpointSubmitButton');
+                await page.click('#checkpointSubmitButton-actual-button');
                 await page.waitForTimeout(4000);
                 // Проверяем окно перед геолокацией
-                if (await page.$('[name="submit[Continue]"]') !== null) {
+                if (await page.$('[name="submit[Continue]"]') !== null) { console.log('geo');
                     await page.click('#checkpointSubmitButton');
                     console.log(1);
                     await page.waitForTimeout(4000);
                 }
-                if (await page.$('button[name="submit[This was me]"]') !== null) {
+                if (await page.$('button[name="submit[This was me]"]') !== null) { console.log('this was me after geo');
                     await page.click('#checkpointSubmitButton');
                     await page.waitForTimeout(4000);
                 }
                 // Проверяем окно для сохранение браузера чтобы не вводить 2fa
-                if (await page.$('button[name="submit[This was me]"]') !== null) {
+                if (await page.$('button[name="submit[This was me]"]') !== null) { console.log('2fa 1');
+                    console.log('save 2fa');
                     await page.click('#checkpointSubmitButton');
                     await page.waitForTimeout(4000);
                 }
-                if (await page.$('#checkpointSecondaryButton') !== null) {
+                if (await page.$('#checkpointSecondaryButton') !== null) { console.log('2fa 2');
                     await page.click('#checkpointSubmitButton');
                     await page.waitForTimeout(4000);
-                    if (await page.$('input[value="id_upload"]') !== null) {
+                    if (await page.$('input[value="id_upload"]') !== null) { 
                         console.log('Checkpoint ID');
                         if (bulk) {
                             return {[login]: {status: 'Old password'}}
@@ -572,63 +601,15 @@ async function runSingle(uuid, login, password, email, email_password, code2fa, 
                         /*return res.send(`Checkpoint ID`);*/
                     }
                 }
-                onMainPage(page, browser, options, proxy_login, proxy_password, login, password, email, email_password, res).then();
+                
+            } 
+            if (await page.$('img[alt="Facebook logo"]')) {
+                await waitForBasicGoToMain(page,browser, options, proxy_login, proxy_password, login, password, email, email_password, res);
                 return bulk ? {[login]: {status: 'OK'}} : res.send({status: 'OK'});
-            } else {
-                if (await page.$('[name="submit[Continue]"]') !== null) {
-                    await page.click('#checkpointSubmitButton');
-                    await page.waitForTimeout(4000);
-                    if (await page.$('button[name="submit[This was me]"]') !== null) {
-                        await page.click('#checkpointSubmitButton');
-                        await page.waitForTimeout(4000);
-                    }
-                    if (await page.$('[name="submit[Continue]"]') !== null) {
-                        await page.click('#checkpointSubmitButton');
-                        await page.waitForTimeout(4000);
-
-                    }
-                    onMainPage(page, browser, options, proxy_login, proxy_password, login, password, email, email_password, res).then();
-                    let checkpoint = '';
-                    if (await page.$('input[value="id_upload"]') !== null) {
-                        checkpoint += ' ID';
-                        console.log('Checkpoint ID');
-                    }
-                    if (await page.$('input[value="14"]') !== null) {
-                        checkpoint += ' Device';
-                        console.log('Checkpoint Device');
-                    }
-                    if (await page.$('#recovery_code_entry') !== null) {
-                        checkpoint += ' EmailCode';
-                        console.log('Checkpoint Device');
-                    }
-                    if (await page.$('#recovery_code_entry') !== null) {
-                        checkpoint += ' EmailCode';
-                        console.log('Checkpoint Device');
-                    }
-                    return bulk ? {[login]: {status: `Checkpoint${checkpoint}`}} : res.send({status: `Checkpoint${checkpoint}`});
-                } else {
-                    onMainPage(page, browser, options, proxy_login, proxy_password, login, password, email, email_password, res).then();
-                }
-                if (bulk) {
-                    return {[login]: {status: 'OK'}}
-                } else {
-                    res.send({status: 'OK'});
-                    await toEmail(proxy_login, proxy_password, email, email_password, browser);
-                }
             }
-        } else {
-            console.log(`Multilogin error`);
-            return bulk ? {[login]: {status: `Multilogin endpoint`}} : res.send({status: `Multilogin endpoint`});
-        }
+        } 
     } catch (err) {
         console.log(err.message);
     }
 }
-
-
-
-
-
-
-
 

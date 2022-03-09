@@ -7,6 +7,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(morgan('common'));
 app.use((req, res, next) => {
+    res.header('Access-Control-Request, *')
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -16,4 +17,4 @@ app.use((req, res, next) => {
 app.use('/multi', require('./multi'));
 
 
-app.listen(3005, () => console.log('Server has been started...'));
+app.listen(3000, () => console.log('Server has been started...'));
