@@ -16,6 +16,8 @@
     "morgan": "^1.10.0",
     "nodemon": "^2.0.4",
     "puppeteer": "^5.5.0",
-    "puppeteer-core": "^5.1.0"
+    "puppeteer-core": "^5.1.0",
+    "puppeteer-extra": "^3.2.3",
+    "puppeteer-extra-plugin-stealth": "^2.9.0"
   }
 }

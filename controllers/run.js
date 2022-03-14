@@ -1,7 +1,13 @@
-const puppeteer = require("puppeteer-core");
+// const puppeteer = require("puppeteer-core");
 const axios = require("axios");
 const fs = require("fs");
 
+const puppeteer = require('puppeteer-extra')
+
+// add stealth plugin and use defaults (all evasion techniques)
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+
+puppeteer.use(StealthPlugin())
 
 
 
@@ -145,7 +151,7 @@ async function setCookie(cookie, page) {
 
 async function videoQuality(page, options) {
   if (options.video === true) {
-    await page.goto("https://www.facebook.com/settings?tab=videos", {
+    await page.goto("https://www.facebook.com/settings?tab=videos&locale=en_US", {
       waitUntil: "load",
       timeout: 60000,
     });
@@ -187,7 +193,7 @@ async function videoQuality(page, options) {
       console.log(e);
     }
     await page.waitForTimeout(500);
-    await page.goto("https://www.facebook.com/");
+    await  await page.goto("https://www.facebook.com?locale=en_US", {waitUntil: "load", timeout: 60000,})
   }
 }
 
@@ -349,25 +355,28 @@ async function accessToken(proxy_login, proxy_password, browser) {
 }
 
 async function putLikes(likeSelector, likesAmount, interval, options, page) {
-  console.log("put like");
   if (options.likes === true) {
-    page.evaluate(async () => {
-      await new Promise((resolve, reject) => {
-        let count;
+    console.log('inside put one like')     
+      await new Promise((resolve) => {
+        console.log('inside the promise putlikes')
+        let count = 0;
         let loop = setInterval(async () => {
-          if (await page.$(likeSelector)) {
+          if (await page.$(likeSelector) && count < likesAmount) {
             await page.click(likeSelector);
             count++;
-          } else {
+          } else if(await !page.$(likeSelector) && count < likesAmount) {
             window.scrollBy(0, window.innerHeight);
+          } else if(await page.$('div[aria-label="Reactions"]')) {
+              await page.click('div[aria-label="Close"]')
+              window.scrollBy(0, window.innerHeight);
           }
-          if (count >= likesAmount) {
+          else if (count >= likesAmount) {
             clearInterval(loop);
-            resolve();
+            resolve('resolved');
+            console.log('closing interval')
           }
         }, interval);
       });
-    });
   }
 }
 
@@ -426,24 +435,26 @@ async function likes(page, options, selector) {
 function waitForBasicGoToMain(page, browser, options, proxy_login,
   proxy_password, login, password, email, email_password, res) {
 
-  console.log("wait and go then close");
   setTimeout(async () => {
     try {
-      if (!page.isClosed()) {
-        await page.close();
+      if (!page.isClosed()) { 
+        console.log('close page')
+        page.close();
       }
     } catch (err) {
       console.error("unexpected error occured when closing page.", err);
     }
-  }, 10000); ///change to 30 min.
+  }, 800); ///change to 30 min.
 
   onMainPage(browser, options, proxy_login, proxy_password, login, password, email, email_password, res).then();
 }
+
+
 async function onMainPage(browser, options, proxy_login, proxy_password,
   login, password, email, email_password, res) {
 
   console.log("onmainpage");
-  const context = browser.defaultBrowserContext();
+  const context = await browser.defaultBrowserContext();
   await context.overridePermissions("https://m.facebook.com/", [
     "notifications",
   ]);
@@ -451,46 +462,48 @@ async function onMainPage(browser, options, proxy_login, proxy_password,
     "notifications",
   ]);
   const page = await browser.newPage();
+  await page.setExtraHTTPHeaders({'Accept-Language': 'en-US'});
+
   await page.authenticate({ username: proxy_login, password: proxy_password });
   await setCookie(options.cookie, page).then();
+  await page.goto("https://m.facebook.com?locale=en_US", {waitUntil: "load", timeout: 60000,})
 
-  await page.goto("https://m.facebook.com/", {
-    waitUntil: "load",
-    timeout: 60000,
-  });
-  await page.waitForTimeout(10000);
   if (await page.$("#nux-nav-button")) {
     await page.click("#nux-nav-button");
   }
-  if (page.$('[data-sigil="messenger_icon"]')) {
-    await likes(page, options, '[data-sigil="ufi-inline-actions"] > div:nth-child(1)');
-    await page.waitForTimeout(10000); ///change to 30 min.
-  }
 
-  if (!page.isClosed()) {
-    await page.goto("https://www.facebook.com/", { waitUntil: "load", ctimeout: 60000, });
-  }
-
-  await page.waitForTimeout(10000);
-
-  if (await page.$('a[aria-label="Facebook"')) {
-    await putLikes('div[aria-label="Like"', 1, 2000, options, page);
-    await page.waitForTimeout(5 * 60 * 1000);
-    const accountArrowNav = ''
-    if (await page.$('div[aria-label="Account"]')) {
-      console.log("to account arrow")
-      await page.click('div[aria-label="Account');
-      const settingsPrivacySelector = '#mount_0_0_CF > div > div:nth-child(1) > div > div:nth-child(4) > div.ehxjyohh.kr520xx4.poy2od1o.b3onmgus.hv4rvrfc.n7fi1qx3 > div:nth-child(2) > div > div > div.j34wkznp.qp9yad78.pmk7jnqg.kr520xx4 > div.iqfcb0g7.tojvnm2t.a6sixzi8.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.l9j0dhe7.iyyx5f41.a8s20v7p > div > div > div > div > div > div > div > div > div.rq0escxv.du4w35lb.ms05siws.pnx7fd3z.b7h9ocf4.pmk7jnqg.j9ispegn.kr520xx4.pedkr2u6.oqq733wu.k4urcfbm > div > div.a8nywdso.sj5x9vvc.rz4wbd8a.ecm0bbzt > div > div:nth-child(1) > div > div.ow4ym5g4.auili1gw.rq0escxv.j83agx80.buofh1pr.g5gj957u.i1fnvgqd.oygrvhab.cxmmr5t8.hcukyx3x.kvgmc6g5.hpfvmrgz.qt6c0cv9.jb3vyjys.l9j0dhe7.du4w35lb.bp9cbjyn.btwxx1t3.dflh9lhu.scb9dxdr.nnctdnn4'
-      const settingsSelector = '#mount_0_0_CF > div > div:nth-child(1) > div > div:nth-child(4) > div.ehxjyohh.kr520xx4.poy2od1o.b3onmgus.hv4rvrfc.n7fi1qx3 > div:nth-child(2) > div > div > div.j34wkznp.qp9yad78.pmk7jnqg.kr520xx4 > div.iqfcb0g7.tojvnm2t.a6sixzi8.k5wvi7nf.q3lfd5jv.pk4s997a.bipmatt0.cebpdrjk.qowsmv63.owwhemhu.dp1hu0rb.dhp61c6y.l9j0dhe7.iyyx5f41.a8s20v7p > div > div > div > div > div > div > div > div > div.rq0escxv.du4w35lb.ms05siws.pnx7fd3z.b7h9ocf4.pmk7jnqg.j9ispegn.kr520xx4.pedkr2u6.oqq733wu.k4urcfbm > div > div.a8nywdso.jbae33se.rz4wbd8a.cxgpxx05 > div > div:nth-child(1) > a'
-      settingsPrivacySelector && await page.click(settingsSelector);
-      settingsSelector && await page.click(settingsSelector);
+  if (await page.$('[data-sigil="messenger_icon"]')) { 
+    let localOptions = {
+      ...options,
+      likes:true
     }
-    if (page.$('div[arialabel="Navigation within Settings"')) {
-      console.log('scroll settings')
-      const settingsScrollSelector = '#mount_0_0_I3 > div > div:nth-child(1) > div > div.rq0escxv.l9j0dhe7.du4w35lb > div > div > div.j83agx80.cbu4d94t.d6urw2fd.dp1hu0rb.l9j0dhe7.du4w35lb > div.rq0escxv.pfnyh3mw.jifvfom9.gs1a9yip.owycx6da.btwxx1t3.j83agx80.buofh1pr.dp1hu0rb.l9j0dhe7.du4w35lb.ka73uehy > div.rq0escxv.l9j0dhe7.j83agx80.cbu4d94t.d2edcug0.hpfvmrgz.pfnyh3mw.dp1hu0rb.rek2kq2y.o36gj0jk.tkr6xdv7 > div > div.rpm2j7zs.k7i0oixp.gvuykj2m.j83agx80.cbu4d94t.ni8dbmo4.du4w35lb.q5bimw55.ofs802cu.pohlnb88.dkue75c7.mb9wzai9.d8ncny3e.buofh1pr.g5gj957u.tgvbjcpo.l56l04vs.r57mb794.kh7kg01d.eg9m0zos.c3g1iek1.l9j0dhe7.k4xni2cv'
-
+    let likeBtn = '[data-sigil="touchable ufi-inline-like like-reaction-flyout"]'
+    await likes(page, localOptions, likeBtn);
+   
+  }
+await page.waitForTimeout(2000)
+  
+    if (!page.isClosed()) {
+    await page.goto("https://www.facebook.com?locale=en_US", { waitUntil: "load", timeout: 60000,});
+}
+  if (await page.$('a[aria-label="Facebook"]')) { 
+    let localOptions = {
+      ...options,
+      likes:true,
+      video:true
+    }
+    console.log('before one like event')
+    const likeBtn = 'div[aria-label="Like"]'
+     await putLikes(likeBtn, 2, 5000, localOptions, page);
+    console.log('after one like')
+    await page.waitForTimeout(2000);
+    await videoQuality(page, localOptions)
+    if(await page.$('a[aria-label="Facebook"]')) { console.log('putting likes 30 minutes')
+      await putLikes(likeBtn, 2, 60000, localOptions, page);
     }
   }
+
+  
 
   // if (await page.selector) !== null || await page.selectork"]') !== null) {
   //     await closePopup(page).then();
@@ -781,19 +794,8 @@ exports.bulk = async (req, res) => {
   ).then(/*result => console.log(result)*/(result) => res.send(result));
 };
 
-async function runSingle(
-  uuid,
-  login,
-  password,
-  email,
-  email_password,
-  code2fa,
-  proxy_ip,
-  proxy_login,
-  proxy_password,
-  options,
-  bulk,
-  res
+async function runSingle( uuid, login, password, email, email_password, code2fa, proxy_ip, proxy_login, 
+  proxy_password, options, bulk, res
 ) {
   try {
     await delay(5000);
@@ -812,7 +814,7 @@ async function runSingle(
       const browser = await puppeteer.connect({
         browserWSEndpoint: response.data.value,
         defaultViewport: null,
-        args: [`--proxy-server=http://${proxy_ip}`],
+        args: [`--proxy-server=http://${proxy_ip}`, '--lang="en-US"'],
         devtools: true,
       });
       await delay(2000);
@@ -821,6 +823,8 @@ async function runSingle(
         "notifications",
       ]);
       const page = await browser.newPage();
+      await page.setExtraHTTPHeaders({'Accept-Language': 'en-US'});
+
       await page.authenticate({
         username: proxy_login,
         password: proxy_password,
@@ -836,23 +840,29 @@ async function runSingle(
           delay: 101,
         });
         await Promise.all([
-          page.click("#login_form > ul > li:nth-child(3) \\\\\\\\\\\\> input"),
-          page.waitForNavigation(),
+          page.click("#login_form > ul > li:nth-child(3) > input"),
+          page.waitForNavigation()
         ]);
-        if ((await page.$("#approvals_code")) === null) {
-          console.log("Old password");
-          return bulk
-            ? { [login]: { status: "Old password" } }
-            : res.send({ status: "Old password" });
-        }
       }
+      await page.$('#root > table > tbody > tr > td > div > form > div > input') &&
+      await page.click('#root > table > tbody > tr > td > div > form > div > input')
+      
       // Проверяем на двухфакторку и вводим 2fa
       if ((await page.$("#approvals_code")) !== null) {
         console.log("2fa");
         const faCode = await get2Fa(code2fa);
         await page.type("#approvals_code", faCode, { delay: 86 });
         await page.click("#checkpointSubmitButton-actual-button");
+        await page.waitForTimeout(4000); 
+        ///Somebody logged into your account was it you
+      if(await page.$('#checkpointSubmitButton-actual-button')) { 
+        await page.click('#checkpointSubmitButton-actual-button')
+        await page.$('[name="submit[This was me]"]') && await page.click('[name="submit[This was me]"]')
+      }
+      if(page.$('[name="submit[This was me]"]')) {
+        await page.click('[name="submit[This was me]"]')
         await page.waitForTimeout(4000);
+      }
         // Проверяем окно перед геолокацией
         if ((await page.$('[name="submit[Continue]"]')) !== null) {
           console.log("geo");
@@ -880,7 +890,8 @@ async function runSingle(
             console.log("Checkpoint ID");
             if (bulk) {
               return { [login]: { status: "Old password" } };
-            } else {
+            }
+             else {
               res.send({ status: "Old password" });
               await toEmail(
                 proxy_login,
@@ -894,6 +905,9 @@ async function runSingle(
           }
         }
       }
+      
+
+      ///if logged in succesfully 
       if (await page.$('img[alt="Facebook logo"]')) {
         await waitForBasicGoToMain(
           page,
